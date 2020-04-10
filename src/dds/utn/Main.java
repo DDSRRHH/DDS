@@ -30,7 +30,7 @@ public class Main {
             scanner.nextLine();
             switch (option){
                 case 1:
-                    user.setPassword(createPassword()); //Se crea la contraseña y se le setea al usuario
+                    createPassword(user); //Se crea la contraseña y se le setea al usuario
                     break;
                 case 2:
                     login(user); // Se loguea
@@ -52,7 +52,7 @@ public class Main {
         System.out.println("3 - Salir");
     }
 
-    public static String createPassword(){
+    public static void createPassword(User user){
         Pattern pattern = Pattern.compile(PASSWORD_REGEX);
         Matcher matcher;
         File filePassword = new File("./pass.txt");
@@ -61,39 +61,27 @@ public class Main {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(filePassword)); //Busca que el archivo exista
             String linea = "";
             boolean isSecure = false;
-            while(!isSecure){
+            while(!isSecure) {
                 System.out.println("Ingrese su contraseña: ");
                 password = scanner.nextLine();
+                matcher = pattern.matcher(password);
+
                 while ((linea = bufferedReader.readLine()) != null) { //Recorre lina por linea del archivo
-                    if (linea.equals(password)) { //Comparo la linea con la contraseña
+                    if ((linea.equals(password) || !matcher.matches())) { //Comparo la linea con la contraseña y veo que cumpla la regex
                         System.out.println("Tu contraseña no es segura.");
+                        break;
+                    } else {
+                        System.out.println("La contraseña corresponde con la validación.");
+                        user.setPassword(password);
+                        isSecure = true;
                         break;
                     }
                 }
-
-                matcher = pattern.matcher(password);
-                boolean validPassword = matcher.matches();
-
-                while(!validPassword){
-                    System.out.println("La contraseña no es válida.");
-                    System.out.println("Ingrese su contraseña: ");
-                    password = scanner.nextLine();
-
-                    matcher = pattern.matcher(password);
-                    if(matcher.matches()){
-                        validPassword = true;
-                    }
-                }
-
-                System.out.println("La contraseña corresponde con la validación.");
-                isSecure = true;
-                return password;
             }
+
         }catch (Exception exception){
             System.out.println("No pudimos abrir el archivo.");
         }
-
-        return null; //revisar
     }
 
     public static void login(User user){
